@@ -90,20 +90,25 @@ impl SignalHandler {
       }
       // SIGTERM is the default signal sent by kill. forward it to child
       // processes and wait for them to exit
-      Signal::Terminate =>
-      {
-        #[cfg(not(windows))]
-        for &child in self.children.keys() {
-          if self.verbosity.loquacious() {
-            eprintln!("just: sending SIGTERM to child process {child}");
-          }
-          nix::sys::signal::kill(
-            nix::unistd::Pid::from_raw(child),
-            Some(Signal::Terminate.into()),
-          )
-          .ok();
-        }
+      Signal::Terminate => self.terminate_children(),
+    }
+  }
+
+  pub(crate) fn terminate_active_children() {
+    Self::instance().terminate_children();
+  }
+
+  fn terminate_children(&self) {
+    #[cfg(not(windows))]
+    for &child in self.children.keys() {
+      if self.verbosity.loquacious() {
+        eprintln!("just: sending SIGTERM to child process {child}");
       }
+      nix::sys::signal::kill(
+        nix::unistd::Pid::from_raw(child),
+        Some(Signal::Terminate.into()),
+      )
+      .ok();
     }
   }
 

@@ -520,16 +520,60 @@ impl<'src> Justfile<'src> {
     if recipe.is_parallel() {
       thread::scope::<_, RunResult>(|thread_scope| {
         let mut handles = Vec::new();
-        for (recipe, arguments) in evaluated {
-          handles.push(thread_scope.spawn(move || {
-            Self::run_recipe(&arguments, config, true, ran, recipe, scopes, search)
-          }));
+        let (sender, receiver) = std::sync::mpsc::channel();
+
+        for (index, (recipe, arguments)) in evaluated.into_iter().enumerate() {
+          let sender = sender.clone();
+          handles.push(Some(thread_scope.spawn(move || {
+            let result = Self::run_recipe(&arguments, config, true, ran, recipe, scopes, search);
+            sender.send(index).ok();
+            result
+          })));
         }
-        for handle in handles {
-          handle
+
+        drop(sender);
+
+        let mut first_error = None;
+        let mut remaining = handles.len();
+
+        while remaining > 0 {
+          let Ok(index) = receiver.recv() else {
+            break;
+          };
+
+          let handle = handles[index]
+            .take()
+            .ok_or_else(|| Error::internal("parallel dependency thread joined twice"))?;
+
+          if let Err(error) = handle
             .join()
-            .map_err(|_| Error::internal("parallel dependency thread panicked"))??;
+            .map_err(|_| Error::internal("parallel dependency thread panicked"))?
+          {
+            if first_error.is_none() {
+              SignalHandler::terminate_active_children();
+              first_error = Some(error);
+            }
+          }
+
+          remaining -= 1;
         }
+
+        for handle in handles.into_iter().flatten() {
+          if let Err(error) = handle
+            .join()
+            .map_err(|_| Error::internal("parallel dependency thread panicked"))?
+          {
+            if first_error.is_none() {
+              SignalHandler::terminate_active_children();
+              first_error = Some(error);
+            }
+          }
+        }
+
+        if let Some(error) = first_error {
+          return Err(error);
+        }
+
         Ok(())
       })?;
     } else {

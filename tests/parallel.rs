@@ -104,6 +104,31 @@ fn parallel_dependencies_report_errors() {
 }
 
 #[test]
+#[cfg(not(windows))]
+fn parallel_dependency_failure_terminates_siblings() {
+  let output = Test::new()
+    .justfile(
+      "
+        [parallel]
+        foo: fail side_effect
+
+        fail:
+          false
+
+        side_effect:
+          sleep 1
+          echo side-effect > out
+      ",
+    )
+    .stderr_regex(
+      "(false\nsleep 1|sleep 1\nfalse)\nerror: Recipe `fail` failed on line 5 with exit code 1\n",
+    )
+    .failure();
+
+  assert!(!output.tempdir.path().join("out").exists());
+}
+
+#[test]
 #[ignore]
 fn dependents_block_on_running_dependencies() {
   Test::new()
