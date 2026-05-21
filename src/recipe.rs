@@ -59,11 +59,17 @@ impl<'src, D> Recipe<'src, D> {
 
 impl<'src> Recipe<'src> {
   pub(crate) fn module_path(&self) -> &Modulepath {
-    self.module_path.as_ref().unwrap()
+    self
+      .module_path
+      .as_ref()
+      .expect("module_path is set during resolution")
   }
 
   pub(crate) fn recipe_path(&self) -> &Modulepath {
-    self.recipe_path.as_ref().unwrap()
+    self
+      .recipe_path
+      .as_ref()
+      .expect("recipe_path is set during resolution")
   }
 
   pub(crate) fn spaced_recipe_path(&self) -> String {

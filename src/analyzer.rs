@@ -47,7 +47,7 @@ impl<'run, 'src> Analyzer<'run, 'src> {
     let mut unstable_features = BTreeSet::new();
 
     let mut stack = Vec::new();
-    let ast = asts.get(root).unwrap();
+    let ast = asts.get(root).expect("root path must be present in asts");
     stack.push(ast);
 
     while let Some(ast) = stack.pop() {
@@ -66,7 +66,11 @@ impl<'run, 'src> Analyzer<'run, 'src> {
           Item::Import { absolute, .. } => {
             if let Some(absolute) = absolute {
               if imports.insert(absolute) {
-                stack.push(asts.get(absolute).unwrap());
+                stack.push(
+                  asts
+                    .get(absolute)
+                    .expect("imported path must be present in asts"),
+                );
               }
             }
           }
