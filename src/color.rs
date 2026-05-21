@@ -17,7 +17,7 @@ impl Color {
     match self.use_color {
       UseColor::Always => true,
       UseColor::Never => false,
-      UseColor::Auto => self.is_terminal,
+      UseColor::Auto => self.is_terminal && std::env::var_os("NO_COLOR").is_none(),
     }
   }
 
@@ -168,5 +168,28 @@ impl Color {
 
   pub(crate) fn use_color(self, use_color: UseColor) -> Self {
     Self { use_color, ..self }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn no_color_env_disables_auto_mode() {
+    let color_in_terminal = Color {
+      is_terminal: true,
+      use_color: UseColor::Auto,
+      ..Color::default()
+    };
+
+    // Safety: single-threaded test; no other thread reads NO_COLOR concurrently.
+    unsafe { std::env::remove_var("NO_COLOR") };
+    assert!(color_in_terminal.active());
+
+    unsafe { std::env::set_var("NO_COLOR", "1") };
+    assert!(!color_in_terminal.active());
+
+    unsafe { std::env::remove_var("NO_COLOR") };
   }
 }
