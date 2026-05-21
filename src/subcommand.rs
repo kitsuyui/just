@@ -409,10 +409,38 @@ impl Subcommand {
 
       Err(Error::FormatCheckFoundDiff)
     } else {
-      fs::write(&search.justfile, formatted).map_err(|io_error| Error::WriteJustfile {
+      // Pre-flight write check: open the existing file for writing to surface
+      // permission errors before creating the temp file. rename(2) checks
+      // directory permissions rather than target file permissions, so without
+      // this check a chmod 400 justfile could be silently overwritten.
+      fs::OpenOptions::new()
+        .write(true)
+        .open(&search.justfile)
+        .map_err(|io_error| Error::WriteJustfile {
+          justfile: search.justfile.clone(),
+          io_error,
+        })?;
+      let dir = search
+        .justfile
+        .parent()
+        .filter(|p| !p.as_os_str().is_empty())
+        .unwrap_or(Path::new("."));
+      let mut tmp = NamedTempFile::new_in(dir).map_err(|io_error| Error::WriteJustfile {
         justfile: search.justfile.clone(),
         io_error,
       })?;
+      tmp
+        .write_all(formatted.as_bytes())
+        .map_err(|io_error| Error::WriteJustfile {
+          justfile: search.justfile.clone(),
+          io_error,
+        })?;
+      tmp
+        .persist(&search.justfile)
+        .map_err(|e| Error::WriteJustfile {
+          justfile: search.justfile.clone(),
+          io_error: e.error,
+        })?;
 
       if config.verbosity.loud() {
         eprintln!("Wrote justfile to `{}`", search.justfile.display());
@@ -431,12 +459,27 @@ impl Subcommand {
       });
     }
 
-    if let Err(io_error) = fs::write(&search.justfile, INIT_JUSTFILE) {
-      return Err(Error::WriteJustfile {
-        justfile: search.justfile,
+    let dir = search
+      .justfile
+      .parent()
+      .filter(|p| !p.as_os_str().is_empty())
+      .unwrap_or(Path::new("."));
+    let mut tmp = NamedTempFile::new_in(dir).map_err(|io_error| Error::WriteJustfile {
+      justfile: search.justfile.clone(),
+      io_error,
+    })?;
+    tmp
+      .write_all(INIT_JUSTFILE.as_bytes())
+      .map_err(|io_error| Error::WriteJustfile {
+        justfile: search.justfile.clone(),
         io_error,
-      });
-    }
+      })?;
+    tmp
+      .persist(&search.justfile)
+      .map_err(|e| Error::WriteJustfile {
+        justfile: search.justfile.clone(),
+        io_error: e.error,
+      })?;
 
     if config.verbosity.loud() {
       eprintln!("Wrote justfile to `{}`", search.justfile.display());
