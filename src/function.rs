@@ -222,7 +222,11 @@ fn choose(_context: Context, n: &str, alphabet: &str) -> FunctionResult {
 }
 
 fn clean(_context: Context, path: &str) -> FunctionResult {
-  Ok(Path::new(path).lexiclean().to_str().unwrap().to_owned())
+  let cleaned = Path::new(path).lexiclean();
+  cleaned
+    .to_str()
+    .map(str::to_string)
+    .ok_or_else(|| format!("Path is not valid unicode: {}", cleaned.display()))
 }
 
 fn dir(name: &'static str, f: fn() -> Option<PathBuf>) -> FunctionResult {

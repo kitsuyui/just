@@ -20,11 +20,22 @@ pub(crate) enum SearchError {
   JustfileHadNoParent { path: PathBuf },
   #[snafu(display(
     "Multiple candidate justfiles found in `{}`: {}",
-    candidates.iter().next().unwrap().parent().unwrap().display(),
+    candidates
+      .iter()
+      .next()
+      .and_then(|c| c.parent())
+      .map(|p| p.display().to_string())
+      .as_deref()
+      .unwrap_or("<unknown>"),
     List::and_ticked(
       candidates
         .iter()
-        .map(|candidate| candidate.file_name().unwrap().to_string_lossy())
+        .map(|candidate| {
+          candidate.file_name().map_or_else(
+            || candidate.display().to_string(),
+            |f| f.to_string_lossy().into_owned(),
+          )
+        })
     ),
   ))]
   MultipleCandidates { candidates: BTreeSet<PathBuf> },
