@@ -666,6 +666,18 @@ fn semver_matches() {
 }
 
 #[test]
+fn strip_suffix() {
+  assert_eval_eq("strip_suffix('foo', 'o')", "fo");
+  assert_eval_eq("strip_suffix('fabab', 'ab')", "fab");
+}
+
+#[test]
+fn strip_prefix() {
+  assert_eval_eq("strip_prefix('oof', 'o')", "of");
+  assert_eval_eq("strip_prefix('ababf', 'ab')", "abf");
+}
+
+#[test]
 fn trim_end_matches() {
   assert_eval_eq("trim_end_matches('foo', 'o')", "f");
   assert_eval_eq("trim_end_matches('fabab', 'ab')", "f");
