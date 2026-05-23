@@ -1188,12 +1188,14 @@ The executable is at: /bin/just
 - `quote(s)` - 用 `'\''` 替换所有的单引号，并在 `s` 的首尾添加单引号。这足以为许多 Shell 转义特殊字符，包括大多数 Bourne Shell 的后代。
 - `replace(s, from, to)` - 将 `s` 中的所有 `from` 替换为 `to`。
 - `replace_regex(s, regex, replacement)` - 将 `s` 中所有的 `regex` 替换为 `replacement`。正则表达式由 [Rust `regex` 包](https://docs.rs/regex/latest/regex/) 提供。参见 [语法文档](https://docs.rs/regex/latest/regex/#syntax) 以了解使用示例。
+- `strip_prefix(s, substr)` - 删除与 `substr` 匹配的 `s` 的单个前缀。
+- `strip_suffix(s, substr)` - 删除与 `substr` 匹配的 `s` 的单个后缀。
 - `trim(s)` - 去掉 `s` 的首尾空格。
 - `trim_end(s)` - 去掉 `s` 的尾部空格。
-- `trim_end_match(s, substr)` - 删除与 `substr` 匹配的 `s` 的后缀。
+- `trim_end_match(s, substr)` - `strip_suffix(s, substr)` 的别名。
 - `trim_end_matches(s, substr)` - 反复删除与 `substr` 匹配的 `s` 的后缀。
 - `trim_start(s)` - 去掉 `s` 的首部空格。
-- `trim_start_match(s, substr)` - 删除与 `substr` 匹配的 `s` 的前缀。
+- `trim_start_match(s, substr)` - `strip_prefix(s, substr)` 的别名。
 - `trim_start_matches(s, substr)` - 反复删除与 `substr` 匹配的 `s` 的前缀。
 
 #### 大小写转换

@@ -673,6 +673,13 @@ fn trim_end_matches() {
 }
 
 #[test]
+fn strip_suffix() {
+  assert_eval_eq("strip_suffix('foo', 'o')", "fo");
+  assert_eval_eq("strip_suffix('fabab', 'ab')", "fab");
+  assert_eval_eq("strip_suffix('fbaabab', 'ab')", "fbaab");
+}
+
+#[test]
 fn trim_end_match() {
   assert_eval_eq("trim_end_match('foo', 'o')", "fo");
   assert_eval_eq("trim_end_match('fabab', 'ab')", "fab");
@@ -683,6 +690,13 @@ fn trim_start_matches() {
   assert_eval_eq("trim_start_matches('oof', 'o')", "f");
   assert_eval_eq("trim_start_matches('ababf', 'ab')", "f");
   assert_eval_eq("trim_start_matches('ababbaf', 'ab')", "baf");
+}
+
+#[test]
+fn strip_prefix() {
+  assert_eval_eq("strip_prefix('oof', 'o')", "of");
+  assert_eval_eq("strip_prefix('ababf', 'ab')", "abf");
+  assert_eval_eq("strip_prefix('ababbaf', 'ab')", "abbaf");
 }
 
 #[test]

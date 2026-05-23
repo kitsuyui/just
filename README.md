@@ -2059,13 +2059,17 @@ The process ID is: 420
   [syntax documentation](https://docs.rs/regex/latest/regex/#syntax) for usage
   examples. Capture groups are supported. The `replacement` string uses
   [Replacement string syntax](https://docs.rs/regex/latest/regex/struct.Regex.html#replacement-string-syntax).
+- `strip_prefix(s, substring)` - Remove one prefix of `s` matching
+  `substring`.
+- `strip_suffix(s, substring)` - Remove one suffix of `s` matching
+  `substring`.
 - `trim(s)` - Remove leading and trailing whitespace from `s`.
 - `trim_end(s)` - Remove trailing whitespace from `s`.
-- `trim_end_match(s, substring)` - Remove suffix of `s` matching `substring`.
+- `trim_end_match(s, substring)` - Alias for `strip_suffix(s, substring)`.
 - `trim_end_matches(s, substring)` - Repeatedly remove suffixes of `s` matching
   `substring`.
 - `trim_start(s)` - Remove leading whitespace from `s`.
-- `trim_start_match(s, substring)` - Remove prefix of `s` matching `substring`.
+- `trim_start_match(s, substring)` - Alias for `strip_prefix(s, substring)`.
 - `trim_start_matches(s, substring)` - Repeatedly remove prefixes of `s`
   matching `substring`.
 

@@ -97,6 +97,8 @@ pub(crate) fn get(name: &str) -> Option<Function> {
     "snakecase" => Unary(snakecase),
     "source_directory" => Nullary(source_directory),
     "source_file" => Nullary(source_file),
+    "strip_prefix" => Binary(strip_prefix),
+    "strip_suffix" => Binary(strip_suffix),
     "style" => Unary(style),
     "titlecase" => Unary(titlecase),
     "trim" => Unary(trim),
@@ -601,6 +603,14 @@ fn source_file(context: Context) -> FunctionResult {
     })
 }
 
+fn strip_prefix(_context: Context, s: &str, prefix: &str) -> FunctionResult {
+  Ok(s.strip_prefix(prefix).unwrap_or(s).to_owned())
+}
+
+fn strip_suffix(_context: Context, s: &str, suffix: &str) -> FunctionResult {
+  Ok(s.strip_suffix(suffix).unwrap_or(s).to_owned())
+}
+
 fn style(context: Context, s: &str) -> FunctionResult {
   match s {
     "command" => Ok(
@@ -627,8 +637,8 @@ fn trim_end(_context: Context, s: &str) -> FunctionResult {
   Ok(s.trim_end().to_owned())
 }
 
-fn trim_end_match(_context: Context, s: &str, pat: &str) -> FunctionResult {
-  Ok(s.strip_suffix(pat).unwrap_or(s).to_owned())
+fn trim_end_match(context: Context, s: &str, pat: &str) -> FunctionResult {
+  strip_suffix(context, s, pat)
 }
 
 fn trim_end_matches(_context: Context, s: &str, pat: &str) -> FunctionResult {
@@ -639,8 +649,8 @@ fn trim_start(_context: Context, s: &str) -> FunctionResult {
   Ok(s.trim_start().to_owned())
 }
 
-fn trim_start_match(_context: Context, s: &str, pat: &str) -> FunctionResult {
-  Ok(s.strip_prefix(pat).unwrap_or(s).to_owned())
+fn trim_start_match(context: Context, s: &str, pat: &str) -> FunctionResult {
+  strip_prefix(context, s, pat)
 }
 
 fn trim_start_matches(_context: Context, s: &str, pat: &str) -> FunctionResult {
