@@ -64,13 +64,13 @@ impl CommandExt for Command {
 
     let output = result.map_err(OutputError::Io)?;
 
-    OutputError::result_from_exit_status(output.status)?;
-
-    let output = str::from_utf8(&output.stdout).map_err(OutputError::Utf8)?;
-
     if let Some(signal) = caught {
       return Err(OutputError::Interrupted(signal));
     }
+
+    OutputError::result_from_exit_status(output.status)?;
+
+    let output = str::from_utf8(&output.stdout).map_err(OutputError::Utf8)?;
 
     Ok(
       output

@@ -508,7 +508,7 @@ impl<'src> Recipe<'src> {
     // run it!
     let (result, caught) = command.status_guard();
 
-    match result {
+    let exit_result = match result {
       Ok(exit_status) => exit_status.code().map_or_else(
         || {
           Err(Error::from_signal(
@@ -530,13 +530,15 @@ impl<'src> Recipe<'src> {
             })
           }
         },
-      )?,
+      ),
       Err(io_error) => return Err(executor.error(io_error, self.name())),
-    }
+    };
 
     if let Some(signal) = caught {
       return Err(Error::Interrupted { signal });
     }
+
+    exit_result?;
 
     Ok(())
   }

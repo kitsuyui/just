@@ -138,6 +138,6 @@ impl SignalHandler {
 
     instance.children.remove(&pid);
 
-    (result, instance.caught)
+    (result, instance.caught.take())
   }
 }
