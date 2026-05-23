@@ -180,7 +180,9 @@ impl Compiler {
 
         if let Some(name) = entry.file_name().to_str() {
           for (candidate, case_sensitive) in &candidates {
-            let candidate_name = candidate.file_name().unwrap().to_str().unwrap();
+            let Some(candidate_name) = candidate.file_name().and_then(|n| n.to_str()) else {
+              continue;
+            };
 
             let eq = if *case_sensitive {
               name == candidate_name

@@ -632,7 +632,11 @@ impl<'src> Justfile<'src> {
 
     for submodule in self.public_modules(config) {
       for group in submodule.groups() {
-        groups.push((&[], submodule.name.unwrap().offset, group.to_string()));
+        groups.push((
+          &[],
+          submodule.name.map(|n| n.offset).unwrap_or_default(),
+          group.to_string(),
+        ));
       }
     }
 
