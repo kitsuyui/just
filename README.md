@@ -2138,11 +2138,18 @@ which will halt execution.
 - `sha256(string)` - Return the SHA-256 hash of `string` as hexadecimal string.
 - `sha256_file(path)` - Return SHA-256 hash of file at `path` as hexadecimal
   string.
-- `uuid()` - Generate a random version 4 UUID.
+- `uuid()` - Generate a random version 4 UUID. Output is non-deterministic;
+  each invocation produces a different value and there is no way to seed the
+  generator.
 
 [BLAKE3]: https://github.com/BLAKE3-team/BLAKE3/
 
 #### Random
+
+Functions in this section use an OS-seeded non-deterministic random number
+generator. Output differs on every invocation and cannot be made reproducible
+by providing a seed. Avoid using these functions in recipes where idempotent
+or reproducible output is required.
 
 - `choose(n, alphabet)`<sup>1.27.0</sup> - Generate a string of `n` randomly
   selected characters from `alphabet`, which may not contain repeated
